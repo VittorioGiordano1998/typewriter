@@ -21,7 +21,7 @@ describe('dictionaries', () => {
   it('translate the text, rather than repeat the English', () => {
     const same = Object.keys(en).filter((k) => (en as Record<string, string>)[k] === (italian as Record<string, string>)[k])
     // Words spelled the same in both languages are fine; everything else must differ.
-    const SAME_IN_BOTH = ['volume']
+    const SAME_IN_BOTH = ['volume', 'authEmail', 'authPassword']
     expect(same.filter((k) => !SAME_IN_BOTH.includes(k)).sort()).toEqual([])
   })
 })

@@ -30,6 +30,8 @@ export interface Archive {
   /** False when nothing can be saved (blocked storage, or a newer app version wrote it). */
   readonly canSave: boolean
   readonly saveBlockedBy: 'none' | 'unavailable'
+  /** Immediately persist the current sheet. */
+  flush(): void
   newDocument(): void
   open(id: string): void
   rename(id: string, title: string): void
@@ -169,6 +171,11 @@ export function createArchive(stored: StoredDataStore, session: Session, deps: A
 
     get saveBlockedBy() {
       return stored.writable ? 'none' : 'unavailable'
+    },
+
+    flush() {
+      save()
+      stored.flush()
     },
 
     newDocument() {

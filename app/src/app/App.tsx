@@ -1,10 +1,15 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createState } from '../core/carriage'
 import { createDocument } from '../core/page'
-import type { Settings } from '../core/storage-schema'
+import { parse, type Settings } from '../core/storage-schema'
+import type { Session as AuthSession } from '@supabase/supabase-js'
+import { supabase } from '../features/cloud/client'
+import { openCloudStore, type SyncStatus } from '../features/cloud/cloudStore'
+import { DICTS } from '../features/i18n/context'
+import { STORAGE_KEY } from '../features/archive/storedData'
 import { createArchive, type Archive } from '../features/archive/archive'
 import { ArchiveContext } from '../features/archive/ArchiveContext'
-import { browserStorage, createStoredDataStore, type StoredDataStore } from '../features/archive/storedData'
+import { browserStorage, type StoredDataStore } from '../features/archive/storedData'
 import { AudioEngine } from '../features/audio/audioEngine'
 import { detectLanguage, useI18n } from '../features/i18n/context'
 import { I18nProvider } from '../features/i18n/I18nProvider'
@@ -186,10 +191,11 @@ function Localised({ store, children }: { store: SettingsStore; children: ReactN
   )
 }
 
-function Body({ stored }: { stored: StoredDataStore }) {
+function Body({ stored, archiveRef }: { stored: StoredDataStore; archiveRef: React.RefObject<Archive | null> }) {
   const store = useSettingsStore()
   const [bundle] = useState(() => newBundle(store.get()))
   const [archive] = useState(() => createArchive(stored, bundle.session))
+  archiveRef.current = archive
   return (
     <Localised store={store}>
       <ArchiveContext.Provider value={archive}>
@@ -199,17 +205,106 @@ function Body({ stored }: { stored: StoredDataStore }) {
   )
 }
 
+type CloudArchive = Awaited<ReturnType<typeof openCloudStore>>
+
+function AccountDesk({ cloud, onSignOut }: { cloud: CloudArchive; onSignOut: () => void }) {
+  const [settings] = useState(() => createSettingsStore(cloud.store))
+  const archiveRef = useRef<Archive | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
+  const [status, setStatus] = useState<SyncStatus>(cloud.status)
+  const [imported, setImported] = useState(false)
+  const language = useSettingsLanguage(settings)
+  const t = DICTS[language]
+  useEffect(() => cloud.subscribe(setStatus), [cloud])
+  const local = browserStorage()
+  const existing = parse(local?.getItem(STORAGE_KEY) ?? null)
+  const canImport = existing.kind === 'ok' && existing.data.documents.length > 0
+  const importLocal = () => {
+    if (existing.kind !== 'ok') return
+    cloud.store.update((data) => {
+      const ids = new Set(data.documents.map((doc) => doc.id))
+      return { ...data, documents: [...data.documents, ...existing.data.documents.filter((doc) => !ids.has(doc.id))] }
+    })
+    setImported(true)
+  }
+  return <SettingsContext.Provider value={settings}>
+    <Body stored={cloud.store} archiveRef={archiveRef} />
+    <aside className="absolute right-3 top-3 z-50 flex max-w-sm flex-wrap items-center gap-2 rounded bg-desk/95 p-3 text-sm shadow-lg" aria-live="polite">
+      {status === 'saving' && <span>{t.cloudSaving}</span>}
+      {status === 'error' && <><span>{t.cloudError}</span><button className="underline" onClick={() => void cloud.retry()}>{t.cloudRetry}</button></>}
+      {status === 'conflict' && <span>{t.cloudConflict}</span>}
+      {canImport && !imported && <button className="underline" onClick={importLocal}>{t.importLocal}</button>}
+      {imported && <span>{t.importDone}</span>}
+      <button className="underline disabled:opacity-50" disabled={status !== 'saved' || signingOut} onClick={() => {
+        setSigningOut(true)
+        archiveRef.current?.flush()
+        void cloud.waitForSave().then((saved) => { if (saved) onSignOut(); else setSigningOut(false) })
+      }}>{t.authSignOut}</button>
+    </aside>
+  </SettingsContext.Provider>
+}
+
+function useSettingsLanguage(store: SettingsStore): Settings['language'] {
+  const [language, setLanguage] = useState(store.get().language)
+  useEffect(() => store.subscribe(() => setLanguage(store.get().language)), [store])
+  return language
+}
+
+function Login({ session }: { session: AuthSession | null }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [busy, setBusy] = useState(false)
+  const t = DICTS[detectLanguage()]
+  const submit = async (signup: boolean) => {
+    if (!supabase) return
+    setBusy(true); setMessage('')
+    const result = signup
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password })
+    setBusy(false)
+    setMessage(result.error ? t.authError : signup && !result.data.session ? t.authCheckEmail : '')
+  }
+  return <main className="grid min-h-full place-items-center p-6">
+    <form className="w-full max-w-md space-y-5 rounded-xl border border-paper/20 bg-desk p-8 shadow-xl" onSubmit={(event) => { event.preventDefault(); void submit(false) }}>
+      <h1 className="font-display text-3xl">{t.authTitle}</h1><p>{t.authIntro}</p>
+      {!supabase ? <p role="alert">{t.authConfig}</p> : <>
+        <label className="block">{t.authEmail}<input className="mt-1 w-full rounded border border-paper/40 bg-transparent p-2" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label>
+        <label className="block">{t.authPassword}<input className="mt-1 w-full rounded border border-paper/40 bg-transparent p-2" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+        <div className="flex gap-4"><button className="rounded bg-brass px-4 py-2 text-desk disabled:opacity-50" disabled={busy} type="submit">{t.authSignIn}</button><button className="underline" disabled={busy} type="button" onClick={() => void submit(true)}>{t.authSignUp}</button></div>
+        {message && <p role="status">{message}</p>}
+      </>}
+      {session && <button type="button" onClick={() => void supabase?.auth.signOut()}>{t.authSignOut}</button>}
+    </form>
+  </main>
+}
+
 export function App() {
-  const [{ stored, settings }] = useState(() => {
-    const stored = createStoredDataStore(browserStorage())
-    const settings = createSettingsStore(stored)
-    // First visit: start in the browser's language.
-    if (stored.fresh) settings.set({ language: detectLanguage() })
-    return { stored, settings }
-  })
-  return (
-    <SettingsContext.Provider value={settings}>
-      <Body stored={stored} />
-    </SettingsContext.Provider>
-  )
+  const [session, setSession] = useState<AuthSession | null>(null)
+  const [ready, setReady] = useState(!supabase)
+  const [loaded, setLoaded] = useState<{ userId: string; cloud: CloudArchive } | null>(null)
+  const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const t = DICTS[detectLanguage()]
+  useEffect(() => {
+    if (!supabase) return
+    const client = supabase
+    let alive = true
+    void client.auth.getSession().then(({ data }) => { if (alive) { setSession(data.session); setReady(true) } })
+    const { data: subscription } = client.auth.onAuthStateChange((_event, next) => { if (alive) { setSession(next); setReady(true) } })
+    return () => { alive = false; subscription.subscription.unsubscribe() }
+  }, [])
+  const userId = session?.user.id
+  useEffect(() => {
+    setLoaded(null); setError(false)
+    if (!userId || !supabase) return
+    let alive = true
+    void openCloudStore(supabase, userId, browserStorage()).then((next) => { if (alive) setLoaded({ userId, cloud: next }); else next.store.dispose() }).catch(() => { if (alive) setError(true) })
+    return () => { alive = false }
+  }, [userId, attempt])
+  if (!ready) return <p role="status">{t.loading}</p>
+  if (!session) return <Login session={null} />
+  if (error) return <main className="grid min-h-full place-items-center p-6"><div><p role="alert">{t.cloudLoadingError}</p><button className="underline" onClick={() => setAttempt((n) => n + 1)}>{t.cloudReload}</button><button className="ml-4 underline" onClick={() => void supabase?.auth.signOut()}>{t.authSignOut}</button></div></main>
+  if (!loaded || loaded.userId !== userId) return <p role="status">{t.loading}</p>
+  return <AccountDesk key={userId} cloud={loaded.cloud} onSignOut={() => void supabase?.auth.signOut()} />
 }
