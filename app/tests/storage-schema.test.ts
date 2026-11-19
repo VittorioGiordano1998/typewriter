@@ -46,6 +46,18 @@ describe('storage schema', () => {
     expect(back.cursor).toEqual(s.cursor)
   })
 
+  it('migrates existing settings and persists a chosen interface theme', () => {
+    const legacy = parse(JSON.stringify({ version: 1, documents: [], settings: { language: 'it' } }))
+    if (legacy.kind !== 'ok') throw new Error('expected ok')
+    expect(legacy.data.settings.theme).toBe('classic')
+    const saved = parse(serialize({ ...legacy.data, settings: { ...legacy.data.settings, theme: 'forest' } }))
+    if (saved.kind !== 'ok') throw new Error('expected ok')
+    expect(saved.data.settings.theme).toBe('forest')
+    const invalid = parse(JSON.stringify({ version: 2, settings: { theme: 'unknown' } }))
+    if (invalid.kind !== 'ok') throw new Error('expected ok')
+    expect(invalid.data.settings.theme).toBe('classic')
+  })
+
   it('stores strikes sparsely, as tuples', () => {
     const stored = toStored(sample().doc, { page: 0, row: 1, col: 1 })
     expect(stored.pages[0][1]).toEqual([1, 0, 'é', 1, expect.any(Number)])

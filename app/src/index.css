@@ -53,3 +53,16 @@ body {
     animation: none;
   }
 }
+
+/* UI palette overrides are scoped to the selected account preference. */
+:root[data-theme="midnight"] {
+  --color-desk: #111a28;
+  --color-paper: #e8f2ff;
+  --color-brass: #8fc8ef;
+}
+
+:root[data-theme="forest"] {
+  --color-desk: #122219;
+  --color-paper: #eef6e9;
+  --color-brass: #abd394;
+}

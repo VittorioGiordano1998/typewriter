@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Language, Settings } from '../core/storage-schema'
+import type { InterfaceTheme, Language, Settings } from '../core/storage-schema'
 import { RIBBON_COLOR } from '../core/ink'
 import { useI18n } from '../features/i18n/context'
 import { useSettings, useSettingsStore } from '../features/settings/SettingsContext'
@@ -56,6 +56,16 @@ export function SettingsPanel({ onClose }: Props) {
         </div>
       </Field>
 
+      <Field label={t.interfaceTheme}>
+        <div role="radiogroup" aria-label={t.interfaceTheme} className="flex flex-wrap gap-2">
+          {(['classic', 'midnight', 'forest'] as const).map((theme: InterfaceTheme) => (
+            <Choice key={theme} selected={settings.theme === theme} onSelect={() => store.set({ theme })}>
+              {theme === 'classic' ? t.themeClassic : theme === 'midnight' ? t.themeMidnight : t.themeForest}
+            </Choice>
+          ))}
+        </div>
+      </Field>
+
       <Field label={t.ribbon}>
         <div role="radiogroup" aria-label={t.ribbon} className="flex gap-2">
           {(['black', 'red'] as const).map((r) => (
@@ -87,14 +97,14 @@ export function SettingsPanel({ onClose }: Props) {
           value={settings.lamp}
           aria-label={t.lamp}
           onChange={(e) => store.set({ lamp: Number(e.target.value) })}
-          className="w-full accent-[#c9a24a]"
+          className="w-full accent-brass"
         />
         <label className="mt-3 flex items-center gap-3">
           <input
             type="checkbox"
             checked={settings.night}
             onChange={(e) => store.set({ night: e.target.checked })}
-            className="h-4 w-4 accent-[#c9a24a]"
+            className="h-4 w-4 accent-brass"
           />
           <span>{t.night}</span>
         </label>
@@ -109,7 +119,7 @@ export function SettingsPanel({ onClose }: Props) {
           value={settings.volume}
           aria-label={t.volume}
           onChange={(e) => store.set({ volume: Number(e.target.value) })}
-          className="w-full accent-[#c9a24a]"
+          className="w-full accent-brass"
         />
       </Field>
     </Panel>

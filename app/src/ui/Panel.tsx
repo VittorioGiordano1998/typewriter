@@ -47,7 +47,7 @@ export function Panel({ title, onClose, placement = 'left', children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`absolute flex flex-col overflow-hidden border-white/10 bg-[#17130f]/95 text-paper shadow-2xl backdrop-blur ${position}`}
+        className={`absolute flex flex-col overflow-hidden border-white/10 bg-desk/95 text-paper shadow-2xl backdrop-blur ${position}`}
       >
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
           <h2 className="font-display text-xl">{title}</h2>

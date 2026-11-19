@@ -4,10 +4,11 @@ import { useI18n } from '../features/i18n/context'
 import { ArchivePanel } from './ArchivePanel'
 import { CreditsPanel } from './CreditsPanel'
 import { ExportPanel } from './ExportPanel'
-import { ExportIcon, InfoIcon, PlusIcon, SheetsIcon, SlidersIcon } from './icons'
+import { ExportIcon, InfoIcon, PlusIcon, ProfileIcon, SheetsIcon, SlidersIcon } from './icons'
 import { SettingsPanel } from './SettingsPanel'
+import { ProfilePanel } from './ProfilePanel'
 
-type PanelId = 'archive' | 'export' | 'settings' | 'credits'
+type PanelId = 'archive' | 'export' | 'settings' | 'credits' | 'profile'
 
 const BUTTON =
   'flex h-10 items-center gap-2 rounded-full bg-black/45 px-3 text-sm text-paper backdrop-blur hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-brass'
@@ -22,7 +23,7 @@ function ToolButton({ label, onClick, children }: { label: string; onClick(): vo
 }
 
 /** The controls at the top left, and the panels they open. */
-export function Toolbar() {
+export function Toolbar({ email }: { email: string }) {
   const { t } = useI18n()
   const archive = useArchive()
   const [open, setOpen] = useState<PanelId | null>(null)
@@ -43,6 +44,9 @@ export function Toolbar() {
         <ToolButton label={t.settings} onClick={() => setOpen('settings')}>
           <SlidersIcon />
         </ToolButton>
+        <ToolButton label={t.profile} onClick={() => setOpen('profile')}>
+          <ProfileIcon />
+        </ToolButton>
         <ToolButton label={t.credits} onClick={() => setOpen('credits')}>
           <InfoIcon />
         </ToolButton>
@@ -50,6 +54,7 @@ export function Toolbar() {
       {open === 'archive' && <ArchivePanel onClose={close} />}
       {open === 'export' && <ExportPanel onClose={close} />}
       {open === 'settings' && <SettingsPanel onClose={close} />}
+      {open === 'profile' && <ProfilePanel email={email} onClose={close} />}
       {open === 'credits' && <CreditsPanel onClose={close} />}
     </>
   )

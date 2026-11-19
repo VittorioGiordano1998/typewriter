@@ -56,7 +56,7 @@ function hasWebGL(): boolean {
   }
 }
 
-function Desk({ bundle, archive }: { bundle: SessionBundle; archive: Archive }) {
+function Desk({ bundle, archive, email }: { bundle: SessionBundle; archive: Archive; email: string }) {
   const settings = useSettings()
   const [view] = useState(() => createViewControl(0.18))
   const [engine] = useState(() => new AudioEngine(import.meta.env.BASE_URL))
@@ -161,7 +161,7 @@ function Desk({ bundle, archive }: { bundle: SessionBundle; archive: Archive }) 
         )}
         {webgl && <TextMirror />}
         <Hud onZoom={zoom} />
-        <Toolbar />
+        <Toolbar email={email} />
         <TypingSurface />
       </main>
     </SessionContext.Provider>
@@ -179,11 +179,13 @@ function Loading() {
 
 /** Language is a setting: this binds the i18n provider to the settings store. */
 function Localised({ store, children }: { store: SettingsStore; children: ReactNode }) {
-  const { language } = useSettings()
+  const { language, theme } = useSettings()
   const setLanguage = useCallback((l: Settings['language']) => store.set({ language: l }), [store])
   useEffect(() => {
     document.documentElement.lang = language
-  }, [language])
+    document.documentElement.dataset.theme = theme
+    return () => { delete document.documentElement.dataset.theme }
+  }, [language, theme])
   return (
     <I18nProvider lang={language} onLangChange={setLanguage}>
       {children}
@@ -191,7 +193,7 @@ function Localised({ store, children }: { store: SettingsStore; children: ReactN
   )
 }
 
-function Body({ stored, archiveRef }: { stored: StoredDataStore; archiveRef: React.RefObject<Archive | null> }) {
+function Body({ stored, archiveRef, email }: { stored: StoredDataStore; archiveRef: React.RefObject<Archive | null>; email: string }) {
   const store = useSettingsStore()
   const [bundle] = useState(() => newBundle(store.get()))
   const [archive] = useState(() => createArchive(stored, bundle.session))
@@ -199,7 +201,7 @@ function Body({ stored, archiveRef }: { stored: StoredDataStore; archiveRef: Rea
   return (
     <Localised store={store}>
       <ArchiveContext.Provider value={archive}>
-        <Desk bundle={bundle} archive={archive} />
+        <Desk bundle={bundle} archive={archive} email={email} />
       </ArchiveContext.Provider>
     </Localised>
   )
@@ -207,7 +209,7 @@ function Body({ stored, archiveRef }: { stored: StoredDataStore; archiveRef: Rea
 
 type CloudArchive = Awaited<ReturnType<typeof openCloudStore>>
 
-function AccountDesk({ cloud, onSignOut }: { cloud: CloudArchive; onSignOut: () => void }) {
+function AccountDesk({ cloud, onSignOut, email }: { cloud: CloudArchive; onSignOut: () => void; email: string }) {
   const [settings] = useState(() => createSettingsStore(cloud.store))
   const archiveRef = useRef<Archive | null>(null)
   const [signingOut, setSigningOut] = useState(false)
@@ -228,7 +230,7 @@ function AccountDesk({ cloud, onSignOut }: { cloud: CloudArchive; onSignOut: () 
     setImported(true)
   }
   return <SettingsContext.Provider value={settings}>
-    <Body stored={cloud.store} archiveRef={archiveRef} />
+    <Body stored={cloud.store} archiveRef={archiveRef} email={email} />
     <aside className="absolute right-3 top-3 z-50 flex max-w-sm flex-wrap items-center gap-2 rounded bg-desk/95 p-3 text-sm shadow-lg" aria-live="polite">
       {status === 'saving' && <span>{t.cloudSaving}</span>}
       {status === 'error' && <><span>{t.cloudError}</span><button className="underline" onClick={() => void cloud.retry()}>{t.cloudRetry}</button></>}
@@ -256,22 +258,20 @@ function Login({ session }: { session: AuthSession | null }) {
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const t = DICTS[detectLanguage()]
-  const submit = async (signup: boolean) => {
+  const submit = async () => {
     if (!supabase) return
     setBusy(true); setMessage('')
-    const result = signup
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+    const result = await supabase.auth.signInWithPassword({ email, password })
     setBusy(false)
-    setMessage(result.error ? t.authError : signup && !result.data.session ? t.authCheckEmail : '')
+    setMessage(result.error ? t.authError : '')
   }
   return <main className="grid min-h-full place-items-center p-6">
-    <form className="w-full max-w-md space-y-5 rounded-xl border border-paper/20 bg-desk p-8 shadow-xl" onSubmit={(event) => { event.preventDefault(); void submit(false) }}>
+    <form className="w-full max-w-md space-y-5 rounded-xl border border-paper/20 bg-desk p-8 shadow-xl" onSubmit={(event) => { event.preventDefault(); void submit() }}>
       <h1 className="font-display text-3xl">{t.authTitle}</h1><p>{t.authIntro}</p>
       {!supabase ? <p role="alert">{t.authConfig}</p> : <>
         <label className="block">{t.authEmail}<input className="mt-1 w-full rounded border border-paper/40 bg-transparent p-2" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label>
         <label className="block">{t.authPassword}<input className="mt-1 w-full rounded border border-paper/40 bg-transparent p-2" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label>
-        <div className="flex gap-4"><button className="rounded bg-brass px-4 py-2 text-desk disabled:opacity-50" disabled={busy} type="submit">{t.authSignIn}</button><button className="underline" disabled={busy} type="button" onClick={() => void submit(true)}>{t.authSignUp}</button></div>
+        <div className="flex gap-4"><button className="rounded bg-brass px-4 py-2 text-desk disabled:opacity-50" disabled={busy} type="submit">{t.authSignIn}</button></div>
         {message && <p role="status">{message}</p>}
       </>}
       {session && <button type="button" onClick={() => void supabase?.auth.signOut()}>{t.authSignOut}</button>}
@@ -306,5 +306,5 @@ export function App() {
   if (!session) return <Login session={null} />
   if (error) return <main className="grid min-h-full place-items-center p-6"><div><p role="alert">{t.cloudLoadingError}</p><button className="underline" onClick={() => setAttempt((n) => n + 1)}>{t.cloudReload}</button><button className="ml-4 underline" onClick={() => void supabase?.auth.signOut()}>{t.authSignOut}</button></div></main>
   if (!loaded || loaded.userId !== userId) return <p role="status">{t.loading}</p>
-  return <AccountDesk key={userId} cloud={loaded.cloud} onSignOut={() => void supabase?.auth.signOut()} />
+  return <AccountDesk key={userId} cloud={loaded.cloud} email={session.user.email ?? ''} onSignOut={() => void supabase?.auth.signOut()} />
 }

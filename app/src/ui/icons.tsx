@@ -64,3 +64,10 @@ export const CloseIcon = () => (
     <path d="M6 6l12 12M18 6 6 18" />
   </Icon>
 )
+
+export const ProfileIcon = () => (
+  <Icon>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4.5 20c.7-4 3.3-6 7.5-6s6.8 2 7.5 6" />
+  </Icon>
+)

@@ -6,15 +6,17 @@ import type { Cursor } from './carriage'
 import { PAGE_ROWS, RIGHT_MARGIN, type Page, type Ribbon, type Strike, type TypewriterDocument } from './page'
 
 /** Bump when the stored shape changes and add a migration step in `migrate`. */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export type Language = 'it' | 'en'
+export type InterfaceTheme = 'classic' | 'midnight' | 'forest'
 
 /** What Backspace does: cross the previous character out with an X, or only move the carriage back. */
 export type BackspaceMode = 'crossOut' | 'move'
 
 export interface Settings {
   readonly language: Language
+  readonly theme: InterfaceTheme
   readonly ribbon: Ribbon
   /** Lamp intensity, 0..1. */
   readonly lamp: number
@@ -27,6 +29,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   language: 'en',
+  theme: 'classic',
   ribbon: 'black',
   lamp: 0.8,
   night: false,
@@ -122,6 +125,7 @@ export function sanitizeSettings(v: unknown): Settings {
   const s = isRecord(v) ? v : {}
   return {
     language: s.language === 'it' || s.language === 'en' ? s.language : DEFAULT_SETTINGS.language,
+    theme: s.theme === 'midnight' || s.theme === 'forest' ? s.theme : DEFAULT_SETTINGS.theme,
     ribbon: s.ribbon === 'red' ? 'red' : 'black',
     lamp: unit(s.lamp, DEFAULT_SETTINGS.lamp),
     night: s.night === true,
