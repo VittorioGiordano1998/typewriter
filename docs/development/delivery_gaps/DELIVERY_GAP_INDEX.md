@@ -2,7 +2,7 @@
 
 This folder records delivery gaps (missing milestone work, missing CI, config gaps); each record lives in the subfolder matching its status. New records follow `DELIVERY_GAP_TEMPLATE.md` and move subfolders on every status change.
 
-0 gaps — 0 Planned · 0 Open · 0 Closed
+1 gap — 0 Planned · 1 Open · 0 Closed
 
 ## Planned
 
@@ -13,6 +13,7 @@ This folder records delivery gaps (missing milestone work, missing CI, config ga
 
 | ID | Gap | Release impact |
 | --- | --- | --- |
+| [DG-VITTORIOGIORDANO-001](open/DG-VITTORIOGIORDANO-001-disable-public-signup-in-supabase-project.md) | Disable public signup in Supabase project | High |
 
 ## Closed
 

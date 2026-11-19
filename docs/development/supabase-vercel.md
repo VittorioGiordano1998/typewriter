@@ -6,7 +6,8 @@ Postgres. Apply `supabase/migrations/202611190001_account_archives.sql` in the S
 The SQL must be applied to the intended project before signing in. Test with two accounts before
 sharing the application. The policies limit access to rows owned by `auth.uid()`.
 
-In Supabase, enable email/password sign-in and configure the site URL and allowed redirect URLs
+In Supabase, enable email/password sign-in, disable new user signups in Authentication settings,
+and configure the site URL and allowed redirect URLs
 for the intended Vercel domain. Email confirmation and delivery depend on the project's Auth
 settings; configure a suitable SMTP provider for production.
 
@@ -26,3 +27,8 @@ imported twice. The app retains account-scoped unsynced drafts in browser storag
 Concurrent edits use a revision check; on conflict, the local draft is retained and the app stops
 uploading rather than overwriting the newer archive. Export the local sheets before resolving a
 conflict; automatic merge and cross-device conflict resolution are not yet implemented.
+
+The login screen does not offer registration. Disable signups in the Supabase project itself as
+well: hiding the interface alone does not prevent direct requests to the Auth API. Create or invite
+users through Supabase administration. Password changes from the profile require the current
+password and support an email verification code when Supabase requests reauthentication.

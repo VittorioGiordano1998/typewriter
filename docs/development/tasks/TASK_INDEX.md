@@ -2,7 +2,7 @@
 
 This folder holds one Markdown record per task, each in the subfolder matching its status; new records are created from `TASK_TEMPLATE.md` and move subfolders on every status change.
 
-11 tasks — 0 Proposed · 0 Ready · 2 In Progress · 0 Blocked · 9 Done · 0 Cancelled
+12 tasks — 0 Proposed · 0 Ready · 2 In Progress · 0 Blocked · 10 Done · 0 Cancelled
 
 ## Proposed
 
@@ -37,6 +37,7 @@ This folder holds one Markdown record per task, each in the subfolder matching i
 | [TASK-CORE-VITTORIOGIORDANOYBQ-001](done/TASK-CORE-VITTORIOGIORDANOYBQ-001-typewriter-core-engine.md) | Typewriter core engine | Feature | core | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-SCENE-VITTORIOGIORDANO-001](done/TASK-SCENE-VITTORIOGIORDANO-001-review-app-and-clear-the-typing-view.md) | Review app and clear the typing view | Fix | scene | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-SCENE-VITTORIOGIORDANOYBQ-001](done/TASK-SCENE-VITTORIOGIORDANOYBQ-001-3d-scene-and-typing.md) | 3D scene and typing | Feature | scene | Medium | 2026-11-19 | 2026-11-19 |
+| [TASK-UI-VITTORIOGIORDANO-001](done/TASK-UI-VITTORIOGIORDANO-001-interface-themes-and-profile-password.md) | Interface themes and profile password | Feature | ui | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-UI-VITTORIOGIORDANOYBQ-001](done/TASK-UI-VITTORIOGIORDANOYBQ-001-features-i18n-ribbon-night-mode-archive-export.md) | Features - i18n, ribbon, night mode, archive, export | Feature | ui | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-UI-VITTORIOGIORDANOYBQ-002](done/TASK-UI-VITTORIOGIORDANOYBQ-002-mobile-support-and-polish.md) | Mobile support and polish | Feature | ui | Medium | 2026-11-19 | 2026-11-19 |
 
