@@ -2,7 +2,7 @@
 
 This folder is the registry of known issues; each record lives in its own `KI-<OWNER>-<NNN>-<slug>.md` file in the subfolder matching its status. New records are created from `KNOWN_ISSUE_TEMPLATE.md` and move subfolders when fixed (`fixed/`) or declined (`wont-fix/`).
 
-2 issues — 2 Open · 0 Fixed · 0 Won't fix
+4 issues — 4 Open · 0 Fixed · 0 Won't fix
 
 ## Open
 
@@ -10,6 +10,8 @@ This folder is the registry of known issues; each record lives in its own `KI-<O
 | --- | --- | --- | --- | --- | --- |
 | [KI-VITTORIOGIORDANO-001](open/KI-VITTORIOGIORDANO-001-open-tabs-overwrite-saved-sheets.md) | Open tabs overwrite saved sheets | archive | High | 2026-11-19 | — |
 | [KI-VITTORIOGIORDANO-002](open/KI-VITTORIOGIORDANO-002-archive-does-not-report-failed-saves-after-startup.md) | Archive does not report failed saves after startup | archive | High | 2026-11-19 | — |
+| [KI-VITTORIOGIORDANO-003](open/KI-VITTORIOGIORDANO-003-cloud-archive-conflicts-require-manual-recovery.md) | Cloud archive conflicts require manual recovery | app | Medium | 2026-11-19 | — |
+| [KI-VITTORIOGIORDANO-004](open/KI-VITTORIOGIORDANO-004-vite-development-server-security-advisories.md) | Vite development server security advisories | app | High | 2026-11-19 | — |
 
 ## Fixed
 

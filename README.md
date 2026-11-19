@@ -63,3 +63,7 @@ default place). They write screenshots and downloads under `app/.tmp`.
 ## Credits
 
 Sounds are CC BY 4.0 (BryanSaraiva, Yle Arkisto via Freesound). See `docs/legal/ASSETS.md`.
+
+## Account and deployment setup
+
+See [Supabase and Vercel setup](docs/development/supabase-vercel.md) for authentication, database policies, local configuration and deployment.

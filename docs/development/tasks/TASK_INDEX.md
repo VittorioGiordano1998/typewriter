@@ -2,7 +2,7 @@
 
 This folder holds one Markdown record per task, each in the subfolder matching its status; new records are created from `TASK_TEMPLATE.md` and move subfolders on every status change.
 
-10 tasks — 0 Proposed · 0 Ready · 2 In Progress · 0 Blocked · 8 Done · 0 Cancelled
+11 tasks — 0 Proposed · 0 Ready · 2 In Progress · 0 Blocked · 9 Done · 0 Cancelled
 
 ## Proposed
 
@@ -30,6 +30,7 @@ This folder holds one Markdown record per task, each in the subfolder matching i
 
 | ID | Task | Type | Area | Severity | Opened | Done |
 | --- | --- | --- | --- | --- | --- | --- |
+| [TASK-APP-VITTORIOGIORDANO-001](done/TASK-APP-VITTORIOGIORDANO-001-supabase-authentication-and-account-archives.md) | Supabase authentication and account archives | Feature | app | High | 2026-11-19 | 2026-11-19 |
 | [TASK-APP-VITTORIOGIORDANOYBQ-001](done/TASK-APP-VITTORIOGIORDANOYBQ-001-bootstrap-app-on-the-nido-stack.md) | Bootstrap app on the Nido stack | Chore | app | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-ASSETS-VITTORIOGIORDANOYBQ-001](done/TASK-ASSETS-VITTORIOGIORDANOYBQ-001-asset-spike-model-sounds-font.md) | Asset spike - model, sounds, font | Chore | assets | Medium | 2026-11-19 | 2026-11-19 |
 | [TASK-AUDIO-VITTORIOGIORDANOYBQ-001](done/TASK-AUDIO-VITTORIOGIORDANOYBQ-001-sound-engine.md) | Sound engine | Feature | audio | Medium | 2026-11-19 | 2026-11-19 |
